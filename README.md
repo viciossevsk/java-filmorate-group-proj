@@ -1,6 +1,9 @@
 # java-filmorate
 
+Схема БД
+
 ![DB flow chart](ER_sheme.JPG)
+
 ``` sql
 SELECT u.*
   FROM USER u
