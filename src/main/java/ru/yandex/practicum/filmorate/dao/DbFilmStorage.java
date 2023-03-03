@@ -214,7 +214,7 @@ public class DbFilmStorage implements FilmStorage {
         return result;
     }
 
-    private Boolean checkFilmExist(Integer filmId) {
+    public Boolean checkFilmExist(Integer filmId) {
         Integer count = jdbcTemplate.queryForObject(CHECK_EXIST_FILM_SQL, Integer.class, filmId);
         if (count > 0) {
             return true;

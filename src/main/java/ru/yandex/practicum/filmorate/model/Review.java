@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
@@ -10,6 +11,7 @@ import javax.validation.constraints.Size;
 @Data
 @Builder
 public class Review {
+    @JsonProperty("reviewId")
     private Integer id;
     @NonNull
     @NotBlank
