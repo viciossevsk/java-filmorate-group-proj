@@ -147,6 +147,13 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new ValidationException("film duration < 0");
         }
     }
+
+    @Override
+    public List<Film> getMostPopularFilms2(Integer count, Integer genreId, Integer year) {
+        log.info(stringToGreenColor("getMostPopularFilms2... "));
+        return getAllFilms().stream().sorted(Comparator.comparing(film -> film.getLikes().size() * -1)).limit(count).collect(Collectors.toList());
+    }
+
     @Override
     public List<Rating> getAllRatings() {
         return new ArrayList<>(ratings.values());

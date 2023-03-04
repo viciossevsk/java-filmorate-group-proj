@@ -76,6 +76,11 @@ public class FilmService {
         return filmStorage.getMostPopularFilms(count);
     }
 
+    public List<Film> getMostPopularFilms2(Integer count, Integer genreId, Integer year) {
+        log.info(stringToGreenColor("getMostPopularFilms... "));
+        return filmStorage.getMostPopularFilms2(count, genreId, year);
+    }
+
     public List<Rating> getAllRatings() {
         return filmStorage.getAllRatings();
     }

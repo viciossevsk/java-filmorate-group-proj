@@ -25,6 +25,7 @@ public interface FilmStorage {
     Rating getRatingById(Integer ratingId);
 
     List<Film> getMostPopularFilms(Integer count);
+    List<Film> getMostPopularFilms2(Integer count, Integer genreId, Integer year);
 
     void addLikeToFilm(int filmId, int userId);
 
