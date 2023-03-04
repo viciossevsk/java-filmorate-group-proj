@@ -50,8 +50,8 @@ public class FilmController {
     /**
      * пользователь ставит лайк фильму
      *
-     * param id     фильма
-     * param userId - ИД юзера
+     * @param filmId     фильма
+     * @param userId - ИД юзера
      */
     @PutMapping("/{id}/like/{userId}")
     public void addLikeToFilm(@PathVariable("id") Integer filmId, @PathVariable Integer userId) {
@@ -62,8 +62,8 @@ public class FilmController {
     /**
      * пользователь удаляет лайк.
      *
-     * param id     фильма
-     * param userId - ИД юзера
+     * @param filmId     фильма
+     * @param userId - ИД юзера
      */
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLikeFromFilm(@PathVariable("id") Integer filmId, @PathVariable Integer userId) {

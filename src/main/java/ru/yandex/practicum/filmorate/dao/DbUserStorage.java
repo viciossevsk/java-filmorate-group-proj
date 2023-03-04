@@ -46,7 +46,6 @@ public class DbUserStorage implements UserStorage {
     private final static String DELETE_FRIENDS_BY_USER_ID_SQL = "delete from friendship where user_id = ?";
     private final static String DELETE_FRIENDSHIP_SQL = "delete from friendship where user_id = ? " +
             "and friend_user_id = ?";
-    private final static String DELETE_USER_SQL = "delete from users where user_id = ?";
     private final static String DELETE_USER_BY_USER_ID = "delete from users where users_id = ?";
     private final JdbcTemplate jdbcTemplate;
     private final FilmLikesDao filmLikesDao;
