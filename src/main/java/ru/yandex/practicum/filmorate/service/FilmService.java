@@ -24,8 +24,8 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
-    public void deleteFilmByIdFromDb(int filmId) {
-        filmStorage.deleteFilmByIdFromDb(filmId);
+    public void deleteFilmById(int filmId) {
+        filmStorage.deleteFilmById(filmId);
     }
     public List<Film> getAllFilms() {
         log.info(stringToGreenColor("call method getAllFilms in FilmStorage... via GET /films"));

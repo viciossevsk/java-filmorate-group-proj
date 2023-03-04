@@ -40,10 +40,6 @@ public class InMemoryFilmStorage implements FilmStorage {
         this.getFilmById(filmId).removeLike(userId);
     }
 
-    @Override
-    public void deleteFilmByIdFromDb(int filmId) {
-
-    }
 
     @Override
     public void addLikeToFilm(int filmId, int userId) {

@@ -11,7 +11,6 @@ public interface UserStorage {
     User createUser(User user);
 
     User updateUser(User user);
-    void deleteUser(Integer userId);
 
     User getUserById(Integer userId);
 
@@ -19,6 +18,6 @@ public interface UserStorage {
 
     void deleteFriend(int userId, int friendId);
 
-    void deleteUserByIdFromDb(int userId);
+    void deleteUserById(int userId);
 
 }

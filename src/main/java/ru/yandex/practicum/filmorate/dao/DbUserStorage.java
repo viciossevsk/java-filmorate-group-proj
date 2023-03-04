@@ -47,6 +47,7 @@ public class DbUserStorage implements UserStorage {
     private final static String DELETE_FRIENDSHIP_SQL = "delete from friendship where user_id = ? " +
             "and friend_user_id = ?";
     private final static String DELETE_USER_SQL = "delete from users where user_id = ?";
+    private final static String DELETE_USER_BY_USER_ID = "delete from users where users_id = ?";
     private final JdbcTemplate jdbcTemplate;
     private final FilmLikesDao filmLikesDao;
 
@@ -105,13 +106,8 @@ public class DbUserStorage implements UserStorage {
     }
 
     @Override
-    public void deleteUser(Integer userId) {
-        jdbcTemplate.update(DELETE_USER_SQL, userId);
-    }
-
-    @Override
-    public void deleteUserByIdFromDb(int userId) {
-        jdbcTemplate.update("delete from users where users_id = ?", userId);
+    public void deleteUserById(int userId) {
+        jdbcTemplate.update(DELETE_USER_BY_USER_ID, userId);
     }
 
     @Override

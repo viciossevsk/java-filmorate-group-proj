@@ -25,8 +25,8 @@ public class UserService {
 
     private final FilmStorage filmStorage;
 
-    public void deleteUserByIdFromDb(int userId) {
-        userStorage.deleteUserByIdFromDb(userId);
+    public void deleteUserById(int userId) {
+        userStorage.deleteUserById(userId);
     }
 
     public User getUser(Integer id) {
