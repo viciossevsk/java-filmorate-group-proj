@@ -25,6 +25,10 @@ public class UserService {
 
     private final FilmStorage filmStorage;
 
+    public void deleteUserByIdFromDb(int userId) {
+        userStorage.deleteUserByIdFromDb(userId);
+    }
+
     public User getUser(Integer id) {
         log.info(stringToGreenColor("call method getUser in UserStorage... via GET /users"));
         return userStorage.getUserById(id);

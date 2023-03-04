@@ -94,4 +94,9 @@ public class UserController {
         return userService.getCommonFriends(id, otherId);
     }
 
+    @DeleteMapping("{userId}")
+    public void deleteUserByIdFromDb (@PathVariable("userId") Integer userId) {
+        userService.deleteUserByIdFromDb(userId);
+    }
+
 }

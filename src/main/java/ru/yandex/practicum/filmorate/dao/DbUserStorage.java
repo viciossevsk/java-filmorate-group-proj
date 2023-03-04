@@ -110,6 +110,11 @@ public class DbUserStorage implements UserStorage {
     }
 
     @Override
+    public void deleteUserByIdFromDb(int userId) {
+        jdbcTemplate.update("delete from users where users_id = ?", userId);
+    }
+
+    @Override
     public void deleteFriend(int userId, int friendId) {
         jdbcTemplate.update(DELETE_FRIENDSHIP_SQL, userId, friendId);
     }
