@@ -23,10 +23,17 @@ import static ru.yandex.practicum.filmorate.otherFunction.AddvansedFunctions.str
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+
     public List<Film> getAllFilms() {
         log.info(stringToGreenColor("call method getAllFilms in FilmStorage... via GET /films"));
         return filmStorage.getAllFilms();
     }
+
+    public List<Film> getFilmsDirectorsSortBy(Integer directorId, String sortBy) {
+        log.info(stringToGreenColor("call method getFilmsDirectorsSortBy in FilmStorage... via GET /films"));
+        return filmStorage.getFilmsDirectorsSortBy(directorId, sortBy);
+    }
+
     public Film createFilm(Film film) {
         log.info(stringToGreenColor("call method add film in FilmStorage... via POST /film"));
         if (film.getLikes() == null) {
@@ -38,10 +45,10 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         log.info(stringToGreenColor("call method update film in FilmStorage... via PUT /film"));
-        Film filmExist = filmStorage.getFilmById(film.getId());
         validateFilm(film);
         return filmStorage.updateFilm(film);
     }
+
     public void addLikeToFilm(Integer filmId, Integer userId) {
         log.info(stringToGreenColor("add like film..."));
         Film filmExist = filmStorage.getFilmById(filmId);
