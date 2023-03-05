@@ -156,7 +156,7 @@ public class DbUserStorage implements UserStorage {
         return rs.getInt("users_id");
     }
 
-    private Boolean checkUserExist(Integer userId) {
+    public Boolean checkUserExist(Integer userId) {
         Integer count = jdbcTemplate.queryForObject(CHECK_EXIST_USER_SQL, Integer.class, userId);
         if (count > 0) {
             return true;
