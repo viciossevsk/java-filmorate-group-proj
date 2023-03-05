@@ -41,6 +41,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getRecommendations(int id) {
+        return new ArrayList<>();
+    }
+
+    @Override
     public void addLikeToFilm(int filmId, int userId) {
         this.getFilmById(filmId).addLike(userId);
     }
