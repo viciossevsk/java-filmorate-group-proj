@@ -100,33 +100,33 @@ public class DbFilmStorage implements FilmStorage {
     @Override
     public Film updateFilm(Film film) throws FilmException {
         if (checkFilmExist(film.getId())) {
-        jdbcTemplate.update(UPDATE_FILM_SQL
-                , film.getName()
-                , film.getDescription()
-                , Date.valueOf(film.getReleaseDate())
-                , film.getDuration()
-                , film.getMpa().getId()
-                , film.getId());
+            jdbcTemplate.update(UPDATE_FILM_SQL
+                    , film.getName()
+                    , film.getDescription()
+                    , Date.valueOf(film.getReleaseDate())
+                    , film.getDuration()
+                    , film.getMpa().getId()
+                    , film.getId());
 
-        genreFilmDao.deleteAllGenreByFilm(film.getId());
+            genreFilmDao.deleteAllGenreByFilm(film.getId());
 
-        if (film.getGenres() != null) {
-            film.getGenres().stream()
-                    .forEach((genre) -> {
-                        genreFilmDao.addNewGenreInFilm(film.getId(), genre.getId());
-                    });
-        }
+            if (film.getGenres() != null) {
+                film.getGenres().stream()
+                        .forEach((genre) -> {
+                            genreFilmDao.addNewGenreInFilm(film.getId(), genre.getId());
+                        });
+            }
 
-        filmLikesDao.deleteAllLikesByFilm(film.getId());
+            filmLikesDao.deleteAllLikesByFilm(film.getId());
 
-        if (film.getLikes() != null) {
-            film.getLikes().stream()
-                    .forEach((like) -> {
-                        genreFilmDao.addNewGenreInFilm(film.getId(), like);
-                    });
-        }
-        log.info("The following film was successfully updated: {}", film);
-        return film;
+            if (film.getLikes() != null) {
+                film.getLikes().stream()
+                        .forEach((like) -> {
+                            genreFilmDao.addNewGenreInFilm(film.getId(), like);
+                        });
+            }
+            log.info("The following film was successfully updated: {}", film);
+            return film;
         } else {
             throw new FilmNotFoundException("Film with id=" + film.getId() + " not found");
         }
@@ -221,6 +221,60 @@ public class DbFilmStorage implements FilmStorage {
         } else {
             return false;
         }
+    }
+
+    public List<Film> getRecommendations(int id) {
+        Set<Integer> recommendationFilmId = new HashSet<>();// контейнер айдишников фильмов, кот будем рекоменд
+        List<Film> recommendationFilm = new ArrayList<>(); // контейнер фильмов, кот будем рекоменд
+        final List<Integer> userFilmsIDList = new ArrayList<>(getFilmsIDList(id)); // лист айди фильмов юзера, кот запросил рекоменд
+        final String sqlQueryUsersID = "SELECT USER_ID from USER"; // из БД берем все юзер айди
+        final List<Integer> allUsersIDList = new ArrayList<>(jdbcTemplate.query(sqlQueryUsersID, this::getIdForUserList)); // собираем строку с id в лист
+        allUsersIDList.remove(id); // удаляем самого себя
+
+        int crossListSize = 0;
+
+        List<Integer> finalUserId = new ArrayList<>();//Лист Id Пользователей с максимальным пересечением по лайкам фильмов
+        for (Integer userId : allUsersIDList) {     // находим пользователя с максимальным пересечением по фильмам с лаками
+            if (getCrossListFilmsId(userId, userFilmsIDList).size() > crossListSize) {
+                crossListSize = getCrossListFilmsId(userId, userFilmsIDList).size();
+            }
+        }
+        for (Integer userId : allUsersIDList) {             //находим список пользователей с crossListSize = максимальному
+            if (getCrossListFilmsId(userId, userFilmsIDList).size() == crossListSize) {
+                finalUserId.add(userId);
+            }
+        }
+        for (Integer userId : finalUserId) {                       //составляем список id фильмов, которые не пересекаются
+            List<Integer> excludeUserFilmsIDList = new ArrayList<>(userFilmsIDList);
+            final List<Integer> otherUserFilmsIDList = new ArrayList<>(getFilmsIDList(userId));
+            otherUserFilmsIDList.removeAll(excludeUserFilmsIDList); // удаляем лишнее
+            recommendationFilmId.addAll(otherUserFilmsIDList);
+        }
+        for (Integer filmId : recommendationFilmId) {
+            recommendationFilm.add(getFilmById(filmId));
+        } // собираем фильмы, которые будем показывать
+        return recommendationFilm;
+    }
+
+    private Integer getIdForUserList(ResultSet rs, int rowNum) throws SQLException {
+        return rs.getInt("USER_ID"); // берем айди из колонки в БД
+    }
+
+    private List<Integer> getCrossListFilmsId(Integer userId, List<Integer> userFilmsIDList) { // получаем список айди с пересечениями
+        List<Integer> includeUserFilmsIDList = new ArrayList<>(userFilmsIDList); //
+        final List<Integer> otherUserFilmsIDList = new ArrayList<>(getFilmsIDList(userId));
+        includeUserFilmsIDList.retainAll(otherUserFilmsIDList);
+        return includeUserFilmsIDList;
+    }
+
+    private List<Integer> getFilmsIDList(Integer userId) {
+        final String sqlQueryFilmsID = "SELECT FILM_ID from FILM_LIKES where USER_ID = ?";
+        return new ArrayList<>(jdbcTemplate.query(sqlQueryFilmsID,
+                this::getFilmsIdForList, userId)); //набираем лист айдишников полайканных фильмов указанным пользователем
+    }
+
+    private Integer getFilmsIdForList(ResultSet rs, int rowNum) throws SQLException {
+        return rs.getInt("FILM_ID");// берем айди из колонки в БД
     }
 
 }

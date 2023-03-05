@@ -141,20 +141,18 @@ public class ReviewDaoImpl implements ReviewDao {
 
     @Override
     public void removeLikeReview(Integer id, Integer userId) {
-        String sql = "UPDATE review_like SET like_or_dislike = ? " +
+        String sql = "DELETE from review_like " +
                 "WHERE review_id = ? AND users_id = ?; ";
         jdbcTemplate.update(sql,
-                0,
                 id,
                 userId);
     }
 
     @Override
     public void removeDislikeReview(Integer id, Integer userId) {
-        String sql = "UPDATE review_like SET like_or_dislike = ? " +
-                "WHERE review_id = ? AND users_id = ?; ";
+        String sql = "DELETE from review_like " +
+                "WHERE review_id = ? AND users_id = ?;";
         jdbcTemplate.update(sql,
-                0,
                 id,
                 userId);
     }
