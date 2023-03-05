@@ -25,6 +25,10 @@ public class UserService {
 
     private final FilmStorage filmStorage;
 
+    public void deleteUserById(int userId) {
+        userStorage.deleteUserById(userId);
+    }
+
     public User getUser(Integer id) {
         log.info(stringToGreenColor("call method getUser in UserStorage... via GET /users"));
         return userStorage.getUserById(id);
@@ -112,6 +116,4 @@ public class UserService {
         }
         return true;
     }
-
-
 }
