@@ -13,6 +13,7 @@ public interface FilmStorage {
     Film createFilm(Film film);
 
     Film updateFilm(Film film);
+
     Film getFilmById(Integer filmId);
 
     List<Genre> getAllGenres();
@@ -23,7 +24,8 @@ public interface FilmStorage {
 
     Rating getRatingById(Integer ratingId);
 
-    List<Film> getMostPopularFilms(Integer count);
+    //  List<Film> getMostPopularFilms(Integer count);
+    List<Film> getMostPopularFilms(Integer count, Integer genreId, Integer year);
 
     void addLikeToFilm(int filmId, int userId);
 

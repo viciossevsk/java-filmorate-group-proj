@@ -77,16 +77,34 @@ public class FilmController {
         filmService.removeLikeFromFilm(filmId, userId);
     }
 
-    /**
-     * возвращает список из первых count фильмов по количеству лайков
-     *
-     * @param count - количество фильмов
-     * @return Если значение параметра count не задано, верните первые 10
-     */
+//    /**
+//     * возвращает список из первых count фильмов по количеству лайков
+//     *
+//     * @param count - количество фильмов
+//     * @return Если значение параметра count не задано, верните первые 10
+//     */
+/*
     @GetMapping("/popular")
     public List<Film> getMostPopularFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
         log.info(stringToGreenColor("call method getAllFilms... via GET /films"));
         return filmService.getMostPopularFilms(count);
+    }
+*/
+
+    /**
+     * возвращает список из первых count фильмов по количеству лайков
+     *
+     * @param count - количество фильмов
+     * @param genreId - фильтр по жанру фильма
+     * @param year - фильтр по году выпуска фильма
+     * @return Если значение параметра count не задано, верните первые 10
+     */
+    @GetMapping("/popular")
+    public List<Film> getMostPopularFilmsWithGenreYear(@RequestParam(defaultValue = "10", required = false) Integer count,
+                                                       @RequestParam(required = false) Integer genreId,
+                                                       @RequestParam(required = false) Integer year) {
+        log.info(stringToGreenColor("call method getMostPopularFilms... via GET /films"));
+        return filmService.getMostPopularFilms(count, genreId, year);
     }
 
     @DeleteMapping("{filmId}")

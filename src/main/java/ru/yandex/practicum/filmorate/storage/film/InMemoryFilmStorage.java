@@ -17,6 +17,12 @@ import static ru.yandex.practicum.filmorate.otherFunction.AddvansedFunctions.str
 @Slf4j
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
+    @Override
+    public List<Film> getMostPopularFilms(Integer count, Integer genreId, Integer year) {
+        log.info(stringToGreenColor("getMostPopularFilms... "));
+        return getAllFilms().stream().sorted(Comparator.comparing(film -> film.getLikes().size() * -1)).limit(count).collect(Collectors.toList());
+    }
+
     private final Map<Integer, Genre> genres = new HashMap<>();
     private final Map<Integer, Rating> ratings = new HashMap<>();
     private final Map<Integer, Film> films = new HashMap<>();
@@ -39,7 +45,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     public void removeLike(int filmId, int userId) {
         this.getFilmById(filmId).removeLike(userId);
     }
-
 
     @Override
     public List<Film> getRecommendations(Integer id) {
@@ -80,12 +85,6 @@ public class InMemoryFilmStorage implements FilmStorage {
         } else {
             throw new FilmNotFoundException("film id=" + id + " not found");
         }
-    }
-
-    @Override
-    public List<Film> getMostPopularFilms(Integer count) {
-        log.info(stringToGreenColor("getAllFilms... "));
-        return getAllFilms().stream().sorted(Comparator.comparing(film -> film.getLikes().size() * -1)).limit(count).collect(Collectors.toList());
     }
 
     @Override
