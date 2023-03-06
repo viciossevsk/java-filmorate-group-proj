@@ -6,8 +6,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
@@ -55,19 +57,53 @@ public class DbFilmStorage implements FilmStorage {
     private final static String UPDATE_FILM_SQL = "update film set " +
             "name = ?, description = ?, release_date = ?, duration = ?, rating_id = ? " +
             "where film_id = ?";
+    private final static String GET_SORT_LIKES_FILMS_BY_DIRECTOR_SQL =
+            "select f.film_id, " +
+                    "f.name, " +
+                    "f.description, " +
+                    "f.release_date, " +
+                    "f.duration, " +
+                    "r.rating_id as rating_id, " +
+                    "r.name as rating_name " +
+                    "from film f " +
+                    "inner join rating r using(rating_id) " +
+                    "inner JOIN DIRECTOR_FILM df using(film_id) " +
+                    "left join film_likes fl using(film_id) " +
+                    "WHERE df.DIRECTOR_ID = ? " +
+                    "group by f.film_id " +
+                    "order by count(distinct fl.users_id)";
+    private final static String GET_SORT_YEAR_FILMS_BY_DIRECTOR_SQL =
+            "select f.film_id, " +
+                    "f.name, " +
+                    "f.description, " +
+                    "f.release_date, " +
+                    "f.duration, " +
+                    "r.rating_id as rating_id, " +
+                    "r.name as rating_name " +
+                    "from film f " +
+                    "inner join rating r using(rating_id) " +
+                    "inner JOIN DIRECTOR_FILM df using(film_id) " +
+                    "left join film_likes fl using(film_id) " +
+                    "WHERE df.DIRECTOR_ID = ? " +
+                    "group by f.film_id " +
+                    "order by RELEASE_DATE";
     private final JdbcTemplate jdbcTemplate;
     private final RatingDao ratingDao;
     private final GenreDao genreDao;
     private final GenreFilmDao genreFilmDao;
     private final FilmLikesDao filmLikesDao;
+    private final DirectorDao directorDao;
+    private final DirectorFilmDao directorFilmDao;
 
     public DbFilmStorage(JdbcTemplate jdbcTemplate, RatingDao ratingDao, GenreDao genreDao, GenreFilmDao genreFilmDao
-            , FilmLikesDao filmLikesDao) {
+            , FilmLikesDao filmLikesDao, DirectorDao directorDao, DirectorFilmDao directorFilmDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.ratingDao = ratingDao;
         this.genreDao = genreDao;
         this.genreFilmDao = genreFilmDao;
         this.filmLikesDao = filmLikesDao;
+        this.directorDao = directorDao;
+        this.directorFilmDao = directorFilmDao;
     }
 
     @Override
@@ -91,6 +127,14 @@ public class DbFilmStorage implements FilmStorage {
         if (film.getGenres() != null) {
             film.getGenres().stream().
                     forEach(genre -> genreFilmDao.addNewGenreInFilm(filmId, genre.getId()));
+        } else {
+            film.setGenres(new LinkedHashSet<>());
+        }
+        if (film.getDirectors() != null) {
+            film.getDirectors().stream().
+                    forEach(director -> directorFilmDao.addNewDirectorInFilm(filmId, director.getId()));
+        } else {
+            film.setDirectors(new LinkedHashSet<>());
         }
         film.setId(filmId);
         log.info("The following film was successfully added: {}", film);
@@ -98,35 +142,64 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getFilmsDirectorsSortBy(Integer directorId, String sortBy) {
+        if (directorDao.checkDirectorExist(directorId)) {
+            if (sortBy.equals("likes")) {
+                return jdbcTemplate.query(GET_SORT_LIKES_FILMS_BY_DIRECTOR_SQL, (rs, rowNum) -> buildFilm(rs),
+                                          directorId);
+            } else {
+                return jdbcTemplate.query(GET_SORT_YEAR_FILMS_BY_DIRECTOR_SQL, (rs, rowNum) -> buildFilm(rs),
+                                          directorId);
+            }
+        } else {
+            throw new DirectorNotFoundException("Director with id=" + directorId + "not found");
+        }
+    }
+
+    @Override
     public Film updateFilm(Film film) throws FilmException {
         if (checkFilmExist(film.getId())) {
-        jdbcTemplate.update(UPDATE_FILM_SQL
-                , film.getName()
-                , film.getDescription()
-                , Date.valueOf(film.getReleaseDate())
-                , film.getDuration()
-                , film.getMpa().getId()
-                , film.getId());
+            jdbcTemplate.update(UPDATE_FILM_SQL
+                    , film.getName()
+                    , film.getDescription()
+                    , Date.valueOf(film.getReleaseDate())
+                    , film.getDuration()
+                    , film.getMpa().getId()
+                    , film.getId());
 
-        genreFilmDao.deleteAllGenreByFilm(film.getId());
+            genreFilmDao.deleteAllGenreByFilm(film.getId());
 
-        if (film.getGenres() != null) {
-            film.getGenres().stream()
-                    .forEach((genre) -> {
-                        genreFilmDao.addNewGenreInFilm(film.getId(), genre.getId());
-                    });
-        }
+            if (film.getGenres() != null) {
+                film.getGenres().stream()
+                        .forEach((genre) -> {
+                            genreFilmDao.addNewGenreInFilm(film.getId(), genre.getId());
+                        });
+            } else {
+                film.setGenres(new LinkedHashSet<>());
+            }
 
-        filmLikesDao.deleteAllLikesByFilm(film.getId());
+            filmLikesDao.deleteAllLikesByFilm(film.getId());
 
-        if (film.getLikes() != null) {
-            film.getLikes().stream()
-                    .forEach((like) -> {
-                        genreFilmDao.addNewGenreInFilm(film.getId(), like);
-                    });
-        }
-        log.info("The following film was successfully updated: {}", film);
-        return film;
+            if (film.getLikes() != null) {
+                film.getLikes().stream()
+                        .forEach((like) -> {
+                            genreFilmDao.addNewGenreInFilm(film.getId(), like);
+                        });
+            } else {
+                film.setLikes(new HashSet<>());
+            }
+            directorFilmDao.deleteAllDirectorsByFilm(film.getId());
+
+            if (film.getDirectors() != null) {
+                film.getDirectors().stream()
+                        .forEach((director) -> {
+                            directorFilmDao.addNewDirectorInFilm(film.getId(), director.getId());
+                        });
+            } else {
+                film.setDirectors(new LinkedHashSet<>());
+            }
+            log.info("The following film was successfully updated: {}", film);
+            return film;
         } else {
             throw new FilmNotFoundException("Film with id=" + film.getId() + " not found");
         }
@@ -209,12 +282,14 @@ public class DbFilmStorage implements FilmStorage {
                 .build();
         Set<Integer> usersLikes = new HashSet<>(filmLikesDao.getUserLikesByFilm(result.getId()));
         LinkedHashSet<Genre> genres = new LinkedHashSet<>(genreFilmDao.getGenresByFilm(result.getId()));
+        LinkedHashSet<Director> directors = new LinkedHashSet<>(directorFilmDao.getDirectorsByFilm(result.getId()));
         result.setLikes(usersLikes);
         result.setGenres(genres);
+        result.setDirectors(directors);
         return result;
     }
 
-    private Boolean checkFilmExist(Integer filmId) {
+    public Boolean checkFilmExist(Integer filmId) {
         Integer count = jdbcTemplate.queryForObject(CHECK_EXIST_FILM_SQL, Integer.class, filmId);
         if (count > 0) {
             return true;
@@ -248,10 +323,7 @@ public class DbFilmStorage implements FilmStorage {
         for (Integer userId : finalUserId) {
             List<Integer> excludeUserFilmsIDList = new ArrayList<>(userFilmsIDList);
             final List<Integer> otherUserFilmsIDList = new ArrayList<>(getFilmsIDList(userId));
-            System.out.println();
-
             otherUserFilmsIDList.removeAll(excludeUserFilmsIDList);
-
             recommendationFilmId.addAll(otherUserFilmsIDList);
         }
         for (Integer filmId : recommendationFilmId) {
@@ -261,9 +333,7 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     private Integer getIdForUserList(ResultSet rs, int rowNum) throws SQLException {
-        int id = rs.getInt("Users_ID");
-        log.info(id + " Users_ID получен");
-        return id;
+        return rs.getInt("Users_ID");
         }
 
     private List<Integer> getCrossListFilmsId(Integer userId, List<Integer> userFilmsIDList) { // получаем список айди с пересечениями
@@ -281,9 +351,8 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     private Integer getFilmsIdForList(ResultSet rs, int rowNum) throws SQLException {
-        int id = rs.getInt("FILM_ID");
-        log.info(id + " FILM_ID получен ");
-        return id;
+        return rs.getInt("FILM_ID");
         }
+
 
 }
