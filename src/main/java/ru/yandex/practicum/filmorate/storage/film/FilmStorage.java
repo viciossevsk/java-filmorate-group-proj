@@ -32,10 +32,7 @@ public interface FilmStorage {
     void removeLike(int filmId, int userId);
 
     List<Film> getRecommendations(Integer id);
-}
 
-// было при конфликте. оставил ибо не зна нужно или нет. если без этого взлетит
-// нужно это удалить
- //   List<Film> getFilmsDirectorsSortBy(Integer directorId, String sortBy);
-//}
+    List<Film> getFilmsDirectorsSortBy(Integer directorId, String sortBy);
+}
 
