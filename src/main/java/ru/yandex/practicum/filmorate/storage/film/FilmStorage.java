@@ -13,7 +13,6 @@ public interface FilmStorage {
     Film createFilm(Film film);
 
     Film updateFilm(Film film);
-    void deleteFilmById(Integer filmId);
     Film getFilmById(Integer filmId);
 
     List<Genre> getAllGenres();
@@ -29,5 +28,12 @@ public interface FilmStorage {
 
     void addLikeToFilm(int filmId, int userId);
 
+    void deleteFilmById(Integer filmId);
+
     void removeLike(int filmId, int userId);
+
+    List<Film> getRecommendations(Integer id);
+
+    List<Film> getFilmsDirectorsSortBy(Integer directorId, String sortBy);
 }
+

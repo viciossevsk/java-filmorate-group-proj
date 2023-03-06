@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,8 +23,12 @@ import static ru.yandex.practicum.filmorate.otherFunction.AddvansedFunctions.str
 public class UserService {
 
     private final UserStorage userStorage;
-
+    @Getter
     private final FilmStorage filmStorage;
+
+    public void deleteUserById(int userId) {
+        userStorage.deleteUserById(userId);
+    }
 
     public User getUser(Integer id) {
         log.info(stringToGreenColor("call method getUser in UserStorage... via GET /users"));
@@ -34,6 +39,7 @@ public class UserService {
         log.info(stringToGreenColor("call method getAllUsers in UserStorage... via GET /users"));
         return userStorage.getAllUsers();
     }
+
     public User createUser(User user) {
         log.info(stringToGreenColor("call method add user in UserStorage... via POST /users"));
         validateUser(user);
@@ -112,6 +118,4 @@ public class UserService {
         }
         return true;
     }
-
-
 }

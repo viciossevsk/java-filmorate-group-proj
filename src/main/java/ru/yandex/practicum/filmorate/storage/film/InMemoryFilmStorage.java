@@ -41,6 +41,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getRecommendations(Integer id) {
+        return new ArrayList<>();
+    }
+
+    @Override
     public void addLikeToFilm(int filmId, int userId) {
         this.getFilmById(filmId).addLike(userId);
     }
@@ -134,7 +139,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     public void validate(Film film) {
         log.trace(stringToGreenColor("validate for film"));
-        if ((film.getName() == null) || (film.getName().isEmpty())) {
+        if (film.getName().isEmpty()) {
             throw new ValidationException("film name invalid");
         }
         if (film.getDescription().length() > 200) {
@@ -149,9 +154,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getMostPopularFilms2(Integer count, Integer genreId, Integer year) {
-        log.info(stringToGreenColor("getMostPopularFilms2... "));
-        return getAllFilms().stream().sorted(Comparator.comparing(film -> film.getLikes().size() * -1)).limit(count).collect(Collectors.toList());
+    public List<Film> getFilmsDirectorsSortBy(Integer directorId, String sortBy) {
+        log.info(stringToGreenColor("getFilmsDirectorsSortBy... via GET /films"));
+        return new ArrayList<>(films.values());
     }
 
     @Override
