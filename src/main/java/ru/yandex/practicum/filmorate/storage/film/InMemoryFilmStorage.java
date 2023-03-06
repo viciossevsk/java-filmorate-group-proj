@@ -135,7 +135,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     public void validate(Film film) {
         log.trace(stringToGreenColor("validate for film"));
-        if ((film.getName() == null) || (film.getName().isEmpty())) {
+        if (film.getName().isEmpty()) {
             throw new ValidationException("film name invalid");
         }
         if (film.getDescription().length() > 200) {
@@ -148,6 +148,13 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new ValidationException("film duration < 0");
         }
     }
+
+    @Override
+    public List<Film> getFilmsDirectorsSortBy(Integer directorId, String sortBy) {
+        log.info(stringToGreenColor("getFilmsDirectorsSortBy... via GET /films"));
+        return new ArrayList<>(films.values());
+    }
+
     @Override
     public List<Rating> getAllRatings() {
         return new ArrayList<>(ratings.values());

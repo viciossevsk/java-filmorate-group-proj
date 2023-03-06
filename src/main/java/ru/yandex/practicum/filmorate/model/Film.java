@@ -26,6 +26,7 @@ public class Film {
     private Rating mpa;
     private Set<Integer> likes;
     private LinkedHashSet<Genre> genres;
+    private LinkedHashSet<Director> directors;
 
 
     public void addLike(Integer userId) {
