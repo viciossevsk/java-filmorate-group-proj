@@ -30,5 +30,5 @@ public interface FilmStorage {
 
     void removeLike(int filmId, int userId);
 
-    List<Film> getRecommendations(int id);
+    List<Film> getRecommendations(Integer id);
 }
