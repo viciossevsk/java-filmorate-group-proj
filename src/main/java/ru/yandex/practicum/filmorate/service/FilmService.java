@@ -82,14 +82,9 @@ public class FilmService {
     /**
      * сортируем DESC
      */
-    public List<Film> getMostPopularFilms(Integer count) {
-        log.info(stringToGreenColor("getAllFilms... "));
-        return filmStorage.getMostPopularFilms(count);
-    }
-
-    public List<Film> getMostPopularFilms2(Integer count, Integer genreId, Integer year) {
+    public List<Film> getMostPopularFilms(Integer count, Integer genreId, Integer year) {
         log.info(stringToGreenColor("getMostPopularFilms... "));
-        return filmStorage.getMostPopularFilms2(count, genreId, year);
+        return filmStorage.getMostPopularFilms(count, genreId, year);
     }
 
     public List<Rating> getAllRatings() {

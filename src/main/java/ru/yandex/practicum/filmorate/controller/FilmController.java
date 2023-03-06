@@ -104,7 +104,7 @@ public class FilmController {
                                                        @RequestParam(required = false) Integer genreId,
                                                        @RequestParam(required = false) Integer year) {
         log.info(stringToGreenColor("call method getMostPopularFilms... via GET /films"));
-        return filmService.getMostPopularFilms2(count, genreId, year);
+        return filmService.getMostPopularFilms(count, genreId, year);
     }
 
     @DeleteMapping("{filmId}")

@@ -269,8 +269,9 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     @Override
-    public List<Film> getMostPopularFilms(Integer count) {
-        return jdbcTemplate.query(GET_POPULAR_FILMS_SQL, (rs, rowNum) -> buildFilm(rs), count);
+    public List<Film> getMostPopularFilms(Integer count, Integer genreId, Integer year) {
+        return jdbcTemplate.query(GET_POPULAR_FILMS_SQL2, (rs, rowNum) -> buildFilm(rs), genreId, genreId, year, year
+                , count);
     }
 
     @Override
