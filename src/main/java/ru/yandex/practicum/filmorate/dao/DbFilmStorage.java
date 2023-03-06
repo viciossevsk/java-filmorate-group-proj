@@ -298,42 +298,43 @@ public class DbFilmStorage implements FilmStorage {
         }
     }
 
-    public List<Film> getRecommendations(int id) {
-        Set<Integer> recommendationFilmId = new HashSet<>();// контейнер айдишников фильмов, кот будем рекоменд
-        List<Film> recommendationFilm = new ArrayList<>(); // контейнер фильмов, кот будем рекоменд
-        final List<Integer> userFilmsIDList = new ArrayList<>(getFilmsIDList(id)); // лист айди фильмов юзера, кот запросил рекоменд
-        final String sqlQueryUsersID = "SELECT USER_ID from USER"; // из БД берем все юзер айди
-        final List<Integer> allUsersIDList = new ArrayList<>(jdbcTemplate.query(sqlQueryUsersID, this::getIdForUserList)); // собираем строку с id в лист
-        allUsersIDList.remove(id); // удаляем самого себя
+    public List<Film> getRecommendations(Integer id) {
+        Set<Integer> recommendationFilmId = new HashSet<>();
+        List<Film> recommendationFilm = new ArrayList<>();
+        final List<Integer> userFilmsIDList = new ArrayList<>(getFilmsIDList(id));
+        final String sqlQueryUsersID = "SELECT USERS_ID from USERS";
+        final List<Integer> allUsersIDList = new ArrayList<>(jdbcTemplate.query(sqlQueryUsersID, this::getIdForUserList)); // собираем строку с id всех Ю в лист
+        allUsersIDList.remove(id); // удаляем самого себя из общего листа
 
         int crossListSize = 0;
 
-        List<Integer> finalUserId = new ArrayList<>();//Лист Id Пользователей с максимальным пересечением по лайкам фильмов
-        for (Integer userId : allUsersIDList) {     // находим пользователя с максимальным пересечением по фильмам с лаками
+        List<Integer> finalUserId = new ArrayList<>();
+
+        for (Integer userId : allUsersIDList) {
             if (getCrossListFilmsId(userId, userFilmsIDList).size() > crossListSize) {
                 crossListSize = getCrossListFilmsId(userId, userFilmsIDList).size();
             }
         }
-        for (Integer userId : allUsersIDList) {             //находим список пользователей с crossListSize = максимальному
+        for (Integer userId : allUsersIDList) {
             if (getCrossListFilmsId(userId, userFilmsIDList).size() == crossListSize) {
                 finalUserId.add(userId);
             }
         }
-        for (Integer userId : finalUserId) {                       //составляем список id фильмов, которые не пересекаются
+        for (Integer userId : finalUserId) {
             List<Integer> excludeUserFilmsIDList = new ArrayList<>(userFilmsIDList);
             final List<Integer> otherUserFilmsIDList = new ArrayList<>(getFilmsIDList(userId));
-            otherUserFilmsIDList.removeAll(excludeUserFilmsIDList); // удаляем лишнее
+            otherUserFilmsIDList.removeAll(excludeUserFilmsIDList);
             recommendationFilmId.addAll(otherUserFilmsIDList);
         }
         for (Integer filmId : recommendationFilmId) {
             recommendationFilm.add(getFilmById(filmId));
-        } // собираем фильмы, которые будем показывать
+        }
         return recommendationFilm;
     }
 
     private Integer getIdForUserList(ResultSet rs, int rowNum) throws SQLException {
-        return rs.getInt("USER_ID"); // берем айди из колонки в БД
-    }
+        return rs.getInt("Users_ID");
+        }
 
     private List<Integer> getCrossListFilmsId(Integer userId, List<Integer> userFilmsIDList) { // получаем список айди с пересечениями
         List<Integer> includeUserFilmsIDList = new ArrayList<>(userFilmsIDList); //
@@ -343,13 +344,15 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     private List<Integer> getFilmsIDList(Integer userId) {
-        final String sqlQueryFilmsID = "SELECT FILM_ID from FILM_LIKES where USER_ID = ?";
+        final String sqlQueryFilmsID = "SELECT FILM_ID from FILM_LIKES where USERS_ID = ?";
+
         return new ArrayList<>(jdbcTemplate.query(sqlQueryFilmsID,
-                this::getFilmsIdForList, userId)); //набираем лист айдишников полайканных фильмов указанным пользователем
+                this::getFilmsIdForList, userId));
     }
 
     private Integer getFilmsIdForList(ResultSet rs, int rowNum) throws SQLException {
-        return rs.getInt("FILM_ID");// берем айди из колонки в БД
-    }
+        return rs.getInt("FILM_ID");
+        }
+
 
 }
