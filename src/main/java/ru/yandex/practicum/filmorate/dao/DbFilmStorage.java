@@ -105,6 +105,31 @@ public class DbFilmStorage implements FilmStorage {
                     "WHERE df.DIRECTOR_ID = ? " +
                     "group by f.film_id " +
                     "order by RELEASE_DATE";
+
+    private final static String GET_COMMON_FILMS_SQL =
+            "select fl.film_id, " +
+                    "f.name, " +
+                    "f.description, " +
+                    "f.release_date, " +
+                    "f.duration, " +
+                    "r.rating_id as rating_id, " +
+                    "r.name as rating_name, " +
+                    "count (fl.film_id) as cnt " +
+                    "from film_likes fl " +
+                    "left join film f on fl.film_id = f.film_id " +
+                    "left join rating r on f.rating_id  = r.rating_id " +
+                    "where fl.film_id in " +
+                    "(select fl.film_id " +
+                    "from users u " +
+                    "left join film_likes fl on fl.users_id = u.users_id " +
+                    "where u.users_id = ? and fl.film_id in " +
+                    "(select film_id " +
+                    "from users u " +
+                    "left join film_likes fl ON fl.users_id = u.users_id " +
+                    "where u.users_id = ?)) " +
+                    "group by fl.film_id " +
+                    "order by cnt desc";
+
     private final JdbcTemplate jdbcTemplate;
     private final RatingDao ratingDao;
     private final GenreDao genreDao;
@@ -164,10 +189,10 @@ public class DbFilmStorage implements FilmStorage {
         if (directorDao.checkDirectorExist(directorId)) {
             if (sortBy.equals("likes")) {
                 return jdbcTemplate.query(GET_SORT_LIKES_FILMS_BY_DIRECTOR_SQL, (rs, rowNum) -> buildFilm(rs),
-                                          directorId);
+                        directorId);
             } else {
                 return jdbcTemplate.query(GET_SORT_YEAR_FILMS_BY_DIRECTOR_SQL, (rs, rowNum) -> buildFilm(rs),
-                                          directorId);
+                        directorId);
             }
         } else {
             throw new DirectorNotFoundException("Director with id=" + directorId + "not found");
@@ -275,6 +300,11 @@ public class DbFilmStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return jdbcTemplate.query(GET_COMMON_FILMS_SQL, (rs, rowNum) -> buildFilm(rs), userId, friendId);
+    }
+
+    @Override
     public void addLikeToFilm(int filmId, int userId) {
         filmLikesDao.addLikeToFilm(filmId, userId);
     }
@@ -353,7 +383,7 @@ public class DbFilmStorage implements FilmStorage {
 
     private Integer getIdForUserList(ResultSet rs, int rowNum) throws SQLException {
         return rs.getInt("Users_ID");
-        }
+    }
 
     private List<Integer> getCrossListFilmsId(Integer userId, List<Integer> userFilmsIDList) { // получаем список айди с пересечениями
         List<Integer> includeUserFilmsIDList = new ArrayList<>(userFilmsIDList); //
@@ -371,7 +401,7 @@ public class DbFilmStorage implements FilmStorage {
 
     private Integer getFilmsIdForList(ResultSet rs, int rowNum) throws SQLException {
         return rs.getInt("FILM_ID");
-        }
+    }
 
 
 }

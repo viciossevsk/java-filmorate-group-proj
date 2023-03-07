@@ -23,6 +23,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         return getAllFilms().stream().sorted(Comparator.comparing(film -> film.getLikes().size() * -1)).limit(count).collect(Collectors.toList());
     }
 
+    @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return null;
+    }
+
     private final Map<Integer, Genre> genres = new HashMap<>();
     private final Map<Integer, Rating> ratings = new HashMap<>();
     private final Map<Integer, Film> films = new HashMap<>();
