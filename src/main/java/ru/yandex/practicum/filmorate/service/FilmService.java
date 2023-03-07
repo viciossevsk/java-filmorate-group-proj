@@ -107,4 +107,8 @@ public class FilmService {
         }
         return true;
     }
+
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
+    }
 }
