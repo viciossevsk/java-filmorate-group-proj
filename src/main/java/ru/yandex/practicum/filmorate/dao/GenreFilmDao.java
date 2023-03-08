@@ -9,7 +9,7 @@ public interface GenreFilmDao {
 
     List<Genre> getGenresByFilm(Integer filmId);
 
-    void deleteGenreFilm(Integer filmId, Integer genreId);
+    public void deleteGenreFilm(Integer filmId, Integer genreId);
 
     void deleteAllGenreByFilm(Integer filmId);
 }

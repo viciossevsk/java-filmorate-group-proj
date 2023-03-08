@@ -17,6 +17,17 @@ import static ru.yandex.practicum.filmorate.otherFunction.AddvansedFunctions.str
 @Slf4j
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
+    @Override
+    public List<Film> getMostPopularFilms(Integer count, Integer genreId, Integer year) {
+        log.info(stringToGreenColor("getMostPopularFilms... "));
+        return getAllFilms().stream().sorted(Comparator.comparing(film -> film.getLikes().size() * -1)).limit(count).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return null;
+    }
+
     private final Map<Integer, Genre> genres = new HashMap<>();
     private final Map<Integer, Rating> ratings = new HashMap<>();
     private final Map<Integer, Film> films = new HashMap<>();
@@ -38,6 +49,11 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void removeLike(int filmId, int userId) {
         this.getFilmById(filmId).removeLike(userId);
+    }
+
+    @Override
+    public List<Film> getRecommendations(Integer id) {
+        return new ArrayList<>();
     }
 
     @Override
@@ -74,12 +90,6 @@ public class InMemoryFilmStorage implements FilmStorage {
         } else {
             throw new FilmNotFoundException("film id=" + id + " not found");
         }
-    }
-
-    @Override
-    public List<Film> getMostPopularFilms(Integer count) {
-        log.info(stringToGreenColor("getAllFilms... "));
-        return getAllFilms().stream().sorted(Comparator.comparing(film -> film.getLikes().size() * -1)).limit(count).collect(Collectors.toList());
     }
 
     @Override
@@ -134,7 +144,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     public void validate(Film film) {
         log.trace(stringToGreenColor("validate for film"));
-        if ((film.getName() == null) || (film.getName().isEmpty())) {
+        if (film.getName().isEmpty()) {
             throw new ValidationException("film name invalid");
         }
         if (film.getDescription().length() > 200) {
@@ -147,6 +157,13 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new ValidationException("film duration < 0");
         }
     }
+
+    @Override
+    public List<Film> getFilmsDirectorsSortBy(Integer directorId, String sortBy) {
+        log.info(stringToGreenColor("getFilmsDirectorsSortBy... via GET /films"));
+        return new ArrayList<>(films.values());
+    }
+
     @Override
     public List<Rating> getAllRatings() {
         return new ArrayList<>(ratings.values());
