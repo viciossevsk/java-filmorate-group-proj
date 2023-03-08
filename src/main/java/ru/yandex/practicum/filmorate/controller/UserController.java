@@ -5,14 +5,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.UserEvent;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.sql.SQLException;
 import java.util.List;
-
-import static ru.yandex.practicum.filmorate.otherFunction.AddvansedFunctions.stringToBlueColor;
-import static ru.yandex.practicum.filmorate.otherFunction.AddvansedFunctions.stringToGreenColor;
 
 @RestController
 @Slf4j
@@ -30,21 +28,17 @@ public class UserController {
      */
     @GetMapping
     public List<User> getAllUsers() {
-        log.info(stringToGreenColor("call method getAllUsers... via GET /users"));
+        //   log.info(stringToGreenColor("call method getAllUsers... via GET /users"));
         return userService.getAllUsers();
     }
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        log.info(stringToGreenColor("call method add user... via POST /users"));
-        log.info(stringToBlueColor(user.toString()));
         return userService.createUser(user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        log.info(stringToGreenColor("call method update user... via PUT /users"));
-        //  log.info(stringToBlueColor(user.toString()));
         return userService.updateUser(user);
     }
 
@@ -53,7 +47,6 @@ public class UserController {
      */
     @GetMapping("/{id}")
     public User getUser(@PathVariable Integer id) {
-        log.info(stringToGreenColor("call method getUser... via GET /users"));
         return userService.getUser(id);
     }
 
@@ -94,6 +87,7 @@ public class UserController {
     public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         return userService.getCommonFriends(id, otherId);
     }
+
     @DeleteMapping("{userId}")
     public void deleteUserById(@PathVariable("userId") Integer userId) {
         userService.deleteUserById(userId);
@@ -102,6 +96,12 @@ public class UserController {
     @GetMapping("/{id}/recommendations")
     public List<Film> getRecommendations(@PathVariable Integer id) {
         return userService.getFilmStorage().getRecommendations(id);
+    }
+
+
+    @GetMapping("/{id}/feed")
+    public List<UserEvent> getFeed(@PathVariable("id") Integer userid) {
+        return userService.getFeed(userid);
     }
 
 }

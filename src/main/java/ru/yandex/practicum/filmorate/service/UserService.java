@@ -4,9 +4,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.UserEventDao;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.UserEvent;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -14,8 +16,6 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static ru.yandex.practicum.filmorate.otherFunction.AddvansedFunctions.stringToGreenColor;
 
 @Service
 @Slf4j
@@ -25,23 +25,21 @@ public class UserService {
     private final UserStorage userStorage;
     @Getter
     private final FilmStorage filmStorage;
+    private final UserEventDao userEventDao;
 
     public void deleteUserById(int userId) {
         userStorage.deleteUserById(userId);
     }
 
     public User getUser(Integer id) {
-        log.info(stringToGreenColor("call method getUser in UserStorage... via GET /users"));
         return userStorage.getUserById(id);
     }
 
     public List<User> getAllUsers() {
-        log.info(stringToGreenColor("call method getAllUsers in UserStorage... via GET /users"));
         return userStorage.getAllUsers();
     }
 
     public User createUser(User user) {
-        log.info(stringToGreenColor("call method add user in UserStorage... via POST /users"));
         validateUser(user);
         if (user.getName() == null || user.getName().isEmpty()) {
             user.setName((user.getLogin()));
@@ -53,24 +51,23 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-        log.info(stringToGreenColor("call method update user in UserStorage... via PUT /users"));
         User userExist = userStorage.getUserById(user.getId());
         validateUser(user);
         return userStorage.updateUser(user);
     }
 
-    public void addFriend(Integer UserId, Integer friendId) {
-        if (UserId < 1) {
-            throw new UserNotFoundException("User with id " + UserId + " not found");
+    public void addFriend(Integer userId, Integer friendId) {
+        if (userId < 1) {
+            throw new UserNotFoundException("User with id " + userId + " not found");
         } else if (friendId < 1) {
             throw new UserNotFoundException("friend with id " + friendId + " not found");
         } else {
-            userStorage.addFriend(UserId, friendId);
+            userStorage.addFriend(userId, friendId);
         }
     }
 
-    public void deleteFriend(Integer UserId, Integer friendId) {
-        userStorage.deleteFriend(UserId, friendId);
+    public void deleteFriend(Integer userId, Integer friendId) {
+        userStorage.deleteFriend(userId, friendId);
 
     }
 
@@ -96,7 +93,7 @@ public class UserService {
     /**
      * получаем ИД друзей юзера
      * ИД друга ищем в друзьях у Other (находим только одинаковых друзей у обоих юзеров)
-     * по ИД друга получаем  объект
+     * по ИД друга получаем объект
      * объединяем объект класса User в коллекцию
      */
     public List<User> getCommonFriends(Integer id, Integer otherId) {
@@ -107,6 +104,11 @@ public class UserService {
                 .filter(otherUser.getFriends()::contains)
                 .map(userStorage::getUserById)
                 .collect(Collectors.toList());
+    }
+
+    public List<UserEvent> getFeed(Integer UserId) {
+
+        return userStorage.getFeedByUserId(UserId);
     }
 
     private boolean validateUser(User user) throws ValidationException {

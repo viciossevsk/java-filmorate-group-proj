@@ -29,7 +29,6 @@ public class FilmService {
     }
 
     public List<Film> getAllFilms() {
-        log.info(stringToGreenColor("call method getAllFilms in FilmStorage... via GET /films"));
         return filmStorage.getAllFilms();
     }
 
@@ -39,7 +38,6 @@ public class FilmService {
     }
 
     public Film createFilm(Film film) {
-        log.info(stringToGreenColor("call method add film in FilmStorage... via POST /film"));
         if (film.getLikes() == null) {
             film.setLikes(new HashSet<>());
         }

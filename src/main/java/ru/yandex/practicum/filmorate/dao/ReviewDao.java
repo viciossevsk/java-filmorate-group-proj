@@ -8,21 +8,21 @@ import java.util.List;
 public interface ReviewDao {
     Review addReview(Review review);
 
+    Review getReviewById(Integer reviewId);
+
     Review updateReview(Review review);
 
-    void removeReview(Integer id);
-
-    Review receiveReview(Integer id);
+    void removeReview(Integer reviewId);
 
     Collection<Review> receiveFilmsReviews(Integer count, String filmId);
 
-    void likeReview(Integer id, Integer userId);
+    void likeReview(Integer reviewId, Integer userId);
 
-    void dislikeReview(Integer id, Integer userId);
+    void dislikeReview(Integer reviewId, Integer userId);
 
-    void removeLikeReview(Integer id, Integer userId);
+    void removeLikeReview(Integer reviewId, Integer userId);
 
-    void removeDislikeReview(Integer id, Integer userId);
+    void removeDislikeReview(Integer reviewId, Integer userId);
 
     List<Review> receiveAllReview();
 }

@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.exception.UserException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.UserEvent;
 
 import java.util.*;
 
@@ -18,6 +19,11 @@ public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Integer, User> users = new HashMap<>();
     private int generatorId = 0;
+
+    @Override
+    public List<UserEvent> getFeedByUserId(Integer userId) {
+        return null;
+    }
 
     public List<User> getAllUsers() {
         log.info(stringToGreenColor("getAllUsers..."));

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
@@ -8,8 +9,11 @@ import ru.yandex.practicum.filmorate.service.ReviewService;
 import javax.validation.Valid;
 import java.util.Collection;
 
+import static ru.yandex.practicum.filmorate.otherFunction.AddvansedFunctions.stringToGreenColor;
+
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/reviews")
 public class ReviewsController {
 
@@ -22,17 +26,18 @@ public class ReviewsController {
 
     @PutMapping()
     public Review updateReview(@Valid @RequestBody Review review) {
+        log.info(stringToGreenColor("апдейтим ревью={}"), review);
         return reviewService.updateReview(review);
     }
 
     @DeleteMapping("/{id}")
-    public void removeReview(@PathVariable("id") Integer id) {
-        reviewService.removeReview(id);
+    public void removeReview(@PathVariable("id") Integer reviewId) {
+        reviewService.removeReview(reviewId);
     }
 
     @GetMapping("/{id}")
-    public Review receiveReview(@PathVariable("id") Integer id) {
-        return reviewService.receiveReview(id);
+    public Review receiveReview(@PathVariable("id") Integer reviewId) {
+        return reviewService.getReviewById(reviewId);
     }
 
     @GetMapping()
