@@ -55,6 +55,7 @@ public class DbFilmStorage implements FilmStorage {
     private final static String UPDATE_FILM_SQL = "update film set " +
             "name = ?, description = ?, release_date = ?, duration = ?, rating_id = ? " +
             "where film_id = ?";
+
     private final JdbcTemplate jdbcTemplate;
     private final RatingDao ratingDao;
     private final GenreDao genreDao;
