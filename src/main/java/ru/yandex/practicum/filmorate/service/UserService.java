@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.dao.UserEventDao;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -25,8 +24,6 @@ public class UserService {
     private final UserStorage userStorage;
     @Getter
     private final FilmStorage filmStorage;
-    private final UserEventDao userEventDao;
-
     public void deleteUserById(int userId) {
         userStorage.deleteUserById(userId);
     }
