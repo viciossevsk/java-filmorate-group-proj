@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,6 +10,9 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.UserException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.UserEvent;
+import ru.yandex.practicum.filmorate.otherFunction.EventType;
+import ru.yandex.practicum.filmorate.otherFunction.OperationType;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.sql.Date;
@@ -26,7 +30,11 @@ import static ru.yandex.practicum.filmorate.otherFunction.AddvansedFunctions.str
 @Component
 @Primary
 @Slf4j
+@Data
 public class DbUserStorage implements UserStorage {
+    private final JdbcTemplate jdbcTemplate;
+    private final FilmLikesDao filmLikesDao;
+    private final UserEventDao userEventDao;
     private final static String GET_ALL_USERS_SQL = "select * from users";
     private final static String CHECK_EXIST_USER_SQL = "select count(*) as cnt from users where users_id = ?";
     private final static String GET_USER_BY_ID_SQL = "select * from users where users_id = ?";
@@ -47,13 +55,6 @@ public class DbUserStorage implements UserStorage {
     private final static String DELETE_FRIENDSHIP_SQL = "delete from friendship where user_id = ? " +
             "and friend_user_id = ?";
     private final static String DELETE_USER_BY_USER_ID = "delete from users where users_id = ?";
-    private final JdbcTemplate jdbcTemplate;
-    private final FilmLikesDao filmLikesDao;
-
-    public DbUserStorage(JdbcTemplate jdbcTemplate, FilmLikesDao filmLikesDao) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.filmLikesDao = filmLikesDao;
-    }
 
     @Override
     public List<User> getAllUsers() {
@@ -62,7 +63,6 @@ public class DbUserStorage implements UserStorage {
 
     @Override
     public User createUser(User user) throws UserException {
-        log.info(stringToGreenColor("create user... in DbUserStorage"));
         KeyHolder userKeyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(SET_NEW_USER_SQL, new String[]{"users_id"});
@@ -74,13 +74,12 @@ public class DbUserStorage implements UserStorage {
         }, userKeyHolder);
         int userId = Objects.requireNonNull(userKeyHolder.getKey()).intValue();
         user.setId(userId);
-        log.info("User add: {}", user);
+        log.info(stringToGreenColor("The user was successfully ADDED: {}"), user);
         return user;
     }
 
     @Override
     public User updateUser(User user) throws UserException {
-        log.info(stringToGreenColor("call method update user... in DbUserStorage"));
         if (checkUserExist(user.getId())) {
         jdbcTemplate.update(UPDATE_USER_SQL
                 , user.getEmail()
@@ -97,7 +96,7 @@ public class DbUserStorage implements UserStorage {
                         jdbcTemplate.update(SET_NEW_FRIENDSHIP_SQL, user.getId(), friend);
                     });
         }
-        log.info("The user was successfully updated: {}", user);
+            log.info(stringToGreenColor("The user was successfully UPDATED: {}"), user);
         return user;
         } else {
             throw new UserNotFoundException("User with id=" + user.getId() + " not found");
@@ -112,18 +111,36 @@ public class DbUserStorage implements UserStorage {
     @Override
     public void deleteFriend(int userId, int friendId) {
         jdbcTemplate.update(DELETE_FRIENDSHIP_SQL, userId, friendId);
+        userEventDao.setUserEvent(userId, EventType.FRIEND, OperationType.REMOVE, friendId);
     }
 
     @Override
     public void addFriend(int userId, int friendId) {
-        jdbcTemplate.update(SET_NEW_FRIENDSHIP_SQL, userId, friendId);
+        if ((checkUserExist(userId)) && (checkUserExist(friendId))) {
+            jdbcTemplate.update(SET_NEW_FRIENDSHIP_SQL, userId, friendId);
+            log.info(stringToGreenColor("User={} friendship to user={}"), userId, friendId);
+            userEventDao.setUserEvent(userId, EventType.FRIEND, OperationType.ADD, friendId);
+        } else {
+            throw new UserNotFoundException("User with id=" + userId + " or friend with id=" + friendId + " not found" +
+                                                    " or not exist");
+        }
     }
 
     @Override
     public User getUserById(Integer userId) throws UserException {
         if (checkUserExist(userId)) {
             User user = jdbcTemplate.queryForObject(GET_USER_BY_ID_SQL, (rs, rowNum) -> buildUser(rs), userId);
+            log.debug(stringToGreenColor("call method getUserById: {}"), user);
             return user;
+        } else {
+            throw new UserNotFoundException("User with id=" + userId + " not found");
+        }
+    }
+
+    @Override
+    public List<UserEvent> getFeedByUserId(Integer userId) {
+        if (checkUserExist(userId)) {
+            return userEventDao.getFeed(userId);
         } else {
             throw new UserNotFoundException("User with id=" + userId + " not found");
         }

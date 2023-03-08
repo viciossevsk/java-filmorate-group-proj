@@ -26,13 +26,11 @@ public class FilmController {
 
     @GetMapping
     public List<Film> getAllFilms() {
-        log.info(stringToGreenColor("call method getAllFilms... via GET /films"));
         return filmService.getAllFilms();
     }
 
     @PostMapping
     public Film createFilm(@Valid @RequestBody Film film) {
-        log.info(stringToGreenColor("call method add film... via POST /film"));
         return filmService.createFilm(film);
     }
 
@@ -61,7 +59,6 @@ public class FilmController {
      */
     @PutMapping("/{id}/like/{userId}")
     public void addLikeToFilm(@PathVariable("id") Integer filmId, @PathVariable Integer userId) {
-        log.info(stringToGreenColor("call method add like film... via PUT /films"));
         filmService.addLikeToFilm(filmId, userId);
     }
 
@@ -76,20 +73,6 @@ public class FilmController {
         log.info(stringToGreenColor("call remove like from film... via DELETE /films"));
         filmService.removeLikeFromFilm(filmId, userId);
     }
-
-//    /**
-//     * возвращает список из первых count фильмов по количеству лайков
-//     *
-//     * @param count - количество фильмов
-//     * @return Если значение параметра count не задано, верните первые 10
-//     */
-/*
-    @GetMapping("/popular")
-    public List<Film> getMostPopularFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
-        log.info(stringToGreenColor("call method getAllFilms... via GET /films"));
-        return filmService.getMostPopularFilms(count);
-    }
-*/
 
     /**
      * возвращает список из первых count фильмов по количеству лайков

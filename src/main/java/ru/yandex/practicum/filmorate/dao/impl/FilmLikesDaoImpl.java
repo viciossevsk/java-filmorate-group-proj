@@ -1,37 +1,44 @@
 package ru.yandex.practicum.filmorate.dao.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmLikesDao;
+import ru.yandex.practicum.filmorate.dao.UserEventDao;
+import ru.yandex.practicum.filmorate.otherFunction.EventType;
+import ru.yandex.practicum.filmorate.otherFunction.OperationType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ru.yandex.practicum.filmorate.otherFunction.AddvansedFunctions.stringToGreenColor;
+
 @Component
+@Slf4j
+@Data
 public class FilmLikesDaoImpl implements FilmLikesDao {
     private final JdbcTemplate jdbcTemplate;
+    private final UserEventDao userEventDao;
     private final static String GET_USER_LIKES_BY_FILM_ID_SQL = "select users_id from film_likes where film_id = ?";
     private final static String SET_NEW_LIKE_TO_FILM_SQL = "insert into film_likes(film_id, users_id) values(?, ?)";
     private final static String DELETE_LIKE_FROM_FILM_SQL = "delete from film_likes where film_id = ? and users_id = ?";
     private final static String DELETE_ALL_LIKES_OF_FILM_SQL = "delete from film_likes where film_id = ?";
     private final static String DELETE_ALL_LIKES_OF_USER_SQL = "delete from film_likes where users_id = ?";
 
-    @Autowired
-    public FilmLikesDaoImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
     @Override
     public void addLikeToFilm(Integer filmId, Integer userId) {
         jdbcTemplate.update(SET_NEW_LIKE_TO_FILM_SQL, filmId, userId);
+        log.info(stringToGreenColor("record event user log... user id={} set like to film id={}"), userId, filmId);
+        userEventDao.setUserEvent(userId, EventType.LIKE, OperationType.ADD, filmId);
     }
 
     @Override
     public void removeLikeFromFilm(Integer filmId, Integer userId) {
         jdbcTemplate.update(DELETE_LIKE_FROM_FILM_SQL, filmId, userId);
+        userEventDao.setUserEvent(userId, EventType.LIKE, OperationType.REMOVE, filmId);
     }
 
     @Override
