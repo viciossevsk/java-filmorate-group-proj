@@ -100,33 +100,33 @@ public class DbFilmStorage implements FilmStorage {
     @Override
     public Film updateFilm(Film film) throws FilmException {
         if (checkFilmExist(film.getId())) {
-        jdbcTemplate.update(UPDATE_FILM_SQL
-                , film.getName()
-                , film.getDescription()
-                , Date.valueOf(film.getReleaseDate())
-                , film.getDuration()
-                , film.getMpa().getId()
-                , film.getId());
+            jdbcTemplate.update(UPDATE_FILM_SQL
+                    , film.getName()
+                    , film.getDescription()
+                    , Date.valueOf(film.getReleaseDate())
+                    , film.getDuration()
+                    , film.getMpa().getId()
+                    , film.getId());
 
-        genreFilmDao.deleteAllGenreByFilm(film.getId());
+            genreFilmDao.deleteAllGenreByFilm(film.getId());
 
-        if (film.getGenres() != null) {
-            film.getGenres().stream()
-                    .forEach((genre) -> {
-                        genreFilmDao.addNewGenreInFilm(film.getId(), genre.getId());
-                    });
-        }
+            if (film.getGenres() != null) {
+                film.getGenres().stream()
+                        .forEach((genre) -> {
+                            genreFilmDao.addNewGenreInFilm(film.getId(), genre.getId());
+                        });
+            }
 
-        filmLikesDao.deleteAllLikesByFilm(film.getId());
+            filmLikesDao.deleteAllLikesByFilm(film.getId());
 
-        if (film.getLikes() != null) {
-            film.getLikes().stream()
-                    .forEach((like) -> {
-                        genreFilmDao.addNewGenreInFilm(film.getId(), like);
-                    });
-        }
-        log.info("The following film was successfully updated: {}", film);
-        return film;
+            if (film.getLikes() != null) {
+                film.getLikes().stream()
+                        .forEach((like) -> {
+                            genreFilmDao.addNewGenreInFilm(film.getId(), like);
+                        });
+            }
+            log.info("The following film was successfully updated: {}", film);
+            return film;
         } else {
             throw new FilmNotFoundException("Film with id=" + film.getId() + " not found");
         }
@@ -222,5 +222,7 @@ public class DbFilmStorage implements FilmStorage {
             return false;
         }
     }
+
+
 
 }
