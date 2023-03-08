@@ -23,10 +23,21 @@ import static ru.yandex.practicum.filmorate.otherFunction.AddvansedFunctions.str
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+
+    public void deleteFilmById(int filmId) {
+        filmStorage.deleteFilmById(filmId);
+    }
+
     public List<Film> getAllFilms() {
         log.info(stringToGreenColor("call method getAllFilms in FilmStorage... via GET /films"));
         return filmStorage.getAllFilms();
     }
+
+    public List<Film> getFilmsDirectorsSortBy(Integer directorId, String sortBy) {
+        log.info(stringToGreenColor("call method getFilmsDirectorsSortBy in FilmStorage... via GET /films"));
+        return filmStorage.getFilmsDirectorsSortBy(directorId, sortBy);
+    }
+
     public Film createFilm(Film film) {
         log.info(stringToGreenColor("call method add film in FilmStorage... via POST /film"));
         if (film.getLikes() == null) {
@@ -38,10 +49,10 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         log.info(stringToGreenColor("call method update film in FilmStorage... via PUT /film"));
-        Film filmExist = filmStorage.getFilmById(film.getId());
         validateFilm(film);
         return filmStorage.updateFilm(film);
     }
+   
     public void addLikeToFilm(Integer filmId, Integer userId) {
         log.info(stringToGreenColor("add like film..."));
         Film filmExist = filmStorage.getFilmById(filmId);
@@ -71,9 +82,9 @@ public class FilmService {
     /**
      * сортируем DESC
      */
-    public List<Film> getMostPopularFilms(Integer count) {
-        log.info(stringToGreenColor("getAllFilms... "));
-        return filmStorage.getMostPopularFilms(count);
+    public List<Film> getMostPopularFilms(Integer count, Integer genreId, Integer year) {
+        log.info(stringToGreenColor("getMostPopularFilms... "));
+        return filmStorage.getMostPopularFilms(count, genreId, year);
     }
 
     public List<Rating> getAllRatings() {
@@ -96,4 +107,31 @@ public class FilmService {
         }
         return true;
     }
+
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
+    }
+
+    public List<Film> searchFilms(String query, String by) {
+        String element = query.toLowerCase();
+        List<Film> filmList;
+        switch (by) {
+            case "title,director":
+            case "director,title":
+                filmList = filmStorage.searchByTitleDirector(element);
+                log.info("Результат поиска фильмов по названию и режиссеру " + filmList.size());
+                return filmList;
+            case "director":
+                filmList = filmStorage.searchFilmByDirector(element);
+                log.info("Результат поиска фильмов по режиссеру " + filmList.size());
+                return filmList;
+            case "title":
+                filmList = filmStorage.searchFilmByTitle(element);
+                log.info("Результат поиска фильмов по названию " + filmList.size());
+                return filmList;
+            default:
+                return filmStorage.getAllFilms();
+        }
+    }
+
 }

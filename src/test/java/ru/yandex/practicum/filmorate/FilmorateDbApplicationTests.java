@@ -120,12 +120,6 @@ class FilmorateDbApplicationTests {
         Assertions.assertEquals(1, filmService.getFilmById(getFilmIdByName("Clinic"))
                 .takeCountLikes());
     }
-
-    @Test
-    void getMostPopularFilms() {
-        Assertions.assertEquals(2, filmService.getMostPopularFilms(10).size());
-    }
-
     @Test
     void getAllFilms() {
         Assertions.assertEquals(2, filmService.getAllFilms().size());

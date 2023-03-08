@@ -24,7 +24,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler({FilmNotFoundException.class, UserNotFoundException.class,
-            RatingNotFoundException.class, GenreNotFoundException.class})
+            RatingNotFoundException.class, GenreNotFoundException.class, DirectorNotFoundException.class, ReviewException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundExceptions(final RuntimeException e) {
         log.debug(e.getMessage());
