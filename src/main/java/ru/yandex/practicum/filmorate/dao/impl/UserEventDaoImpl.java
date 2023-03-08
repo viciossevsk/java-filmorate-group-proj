@@ -21,10 +21,11 @@ import static ru.yandex.practicum.filmorate.otherFunction.AddvansedFunctions.str
 @Slf4j
 public class UserEventDaoImpl implements UserEventDao {
     private final JdbcTemplate jdbcTemplate;
+    
     private final static String SET_EVENT_TO_USER_SQL = "INSERT INTO USER_EVENT " +
-            "(TIME_STAMP, USERS_ID, EVENT_TYPE, OPERATION_TYPE, ENTITY_ID) " +
+            "(USERS_ID, EVENT_TYPE, OPERATION_TYPE, ENTITY_ID) " +
             "VALUES " +
-            "(?, ?, ?, ?, ?)";
+            "(?, ?, ?, ?)";
     private final static String GET_EVENTS_TO_USER_SQL = "SELECT * FROM USER_EVENT " +
             "WHERE USERS_ID = ? ";
 
@@ -48,7 +49,7 @@ public class UserEventDaoImpl implements UserEventDao {
     @Override
     public void setUserEvent(Integer userId, EventType eventType, OperationType operationType, Integer entityId) {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        jdbcTemplate.update(SET_EVENT_TO_USER_SQL, timestamp, userId, eventType.toString(), operationType.toString(),
+        jdbcTemplate.update(SET_EVENT_TO_USER_SQL,  userId, eventType.toString(), operationType.toString(),
                             entityId);
         log.info(stringToRedColor("Create feed timestamp={}, userId={}, event={}, operation={}, entityId={}"),
                  timestamp, userId, eventType.toString(), operationType.toString(), entityId);
