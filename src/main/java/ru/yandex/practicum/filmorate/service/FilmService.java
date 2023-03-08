@@ -109,4 +109,27 @@ public class FilmService {
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
         return filmStorage.getCommonFilms(userId, friendId);
     }
+
+    public List<Film> searchFilms(String query, String by) {
+        String element = query.toLowerCase();
+        List<Film> filmList;
+        switch (by) {
+            case "title,director":
+            case "director,title":
+                filmList = filmStorage.searchByTitleDirector(element);
+                log.info("Результат поиска фильмов по названию и режиссеру " + filmList.size());
+                return filmList;
+            case "director":
+                filmList = filmStorage.searchFilmByDirector(element);
+                log.info("Результат поиска фильмов по режиссеру " + filmList.size());
+                return filmList;
+            case "title":
+                filmList = filmStorage.searchFilmByTitle(element);
+                log.info("Результат поиска фильмов по названию " + filmList.size());
+                return filmList;
+            default:
+                return filmStorage.getAllFilms();
+        }
+    }
+
 }

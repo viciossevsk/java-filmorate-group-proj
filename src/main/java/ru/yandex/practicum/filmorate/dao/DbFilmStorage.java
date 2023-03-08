@@ -132,6 +132,34 @@ public class DbFilmStorage implements FilmStorage {
                     "group by fl.film_id " +
                     "order by cnt desc";
 
+    private final static String SEARCH_FILMS_BY_DIRECTOR =
+            "SELECT F.*, R.NAME as rating_name, r.rating_id as rating_id, D.NAME as director_name " +
+                    "FROM FILM AS F " +
+                    "JOIN RATING AS R on F.RATING_ID = R.RATING_ID " +
+                    "LEFT JOIN FILM_LIKES AS L on F.FILM_ID = L.FILM_ID " +
+                    "LEFT JOIN DIRECTOR_FILM AS DF ON F.FILM_ID = DF.FILM_ID " +
+                    "LEFT JOIN DIRECTOR AS D ON D.DIRECTOR_ID = DF.DIRECTOR_ID " +
+                    "WHERE LOWER(D.NAME) LIKE ? " +
+                    "GROUP BY F.FILM_ID ORDER BY COUNT(L.USERS_ID) DESC";
+
+    private final static String SEARCH_FILMS_BY_TITLE =
+            "SELECT F.*, R.NAME as rating_name, r.rating_id as rating_id " +
+                    "FROM FILM AS F " +
+                    "JOIN RATING AS R on F.RATING_ID = R.RATING_ID " +
+                    "LEFT JOIN FILM_LIKES AS L on F.FILM_ID = L.FILM_ID " +
+                    "WHERE LOWER(F.NAME) LIKE ? " +
+                    "GROUP BY F.FILM_ID ORDER BY COUNT(L.USERS_ID) DESC ";
+
+    private final static String SEARCH_FILMS_BY_TITLE_DIRECTOR =
+            "SELECT F.*, R.NAME as rating_name, r.rating_id as rating_id, D.NAME as director_name " +
+                    "FROM FILM AS F " +
+                    "LEFT JOIN RATING AS R on F.RATING_ID = R.RATING_ID " +
+                    "LEFT JOIN FILM_LIKES AS L on F.FILM_ID = L.FILM_ID " +
+                    "LEFT JOIN DIRECTOR_FILM AS DF ON F.FILM_ID = DF.FILM_ID " +
+                    "LEFT JOIN DIRECTOR AS D ON D.DIRECTOR_ID = DF.DIRECTOR_ID " +
+                    "WHERE LOWER(D.NAME) LIKE ? OR LOWER(F.NAME) LIKE ? " +
+                    "GROUP BY F.FILM_ID ORDER BY COUNT(L.USERS_ID) DESC";
+
     private final JdbcTemplate jdbcTemplate;
     private final RatingDao ratingDao;
     private final GenreDao genreDao;
@@ -409,5 +437,22 @@ public class DbFilmStorage implements FilmStorage {
         return rs.getInt("FILM_ID");
     }
 
+    @Override
+    public List<Film> searchFilmByDirector(String director) {
+        String sqlQuery = SEARCH_FILMS_BY_DIRECTOR;
+        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> buildFilm(rs), "%" + director + "%");
+    }
+
+    @Override
+    public List<Film> searchFilmByTitle(String title) {
+        String sqlQuery = SEARCH_FILMS_BY_TITLE;
+        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> buildFilm(rs), "%" + title + "%");
+    }
+
+    @Override
+    public List<Film> searchByTitleDirector(String dirtit) {
+        String sqlQuery = SEARCH_FILMS_BY_TITLE_DIRECTOR;
+        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> buildFilm(rs), "%" + dirtit + "%", "%" + dirtit + "%");
+    }
 
 }

@@ -102,4 +102,11 @@ public class FilmController {
         log.info(stringToGreenColor("call method getCommonFilms... via GET /films"));
         return filmService.getCommonFilms(userId, friendId);
     }
+
+    @GetMapping("/search")
+    public List<Film> search(@RequestParam(value = "query", required = false) String query,
+                             @RequestParam(value = "by", required = false) String by) {
+        return filmService.searchFilms(query, by);//вызываем метод поиска
+    }
+
 }
